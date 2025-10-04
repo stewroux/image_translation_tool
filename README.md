@@ -115,4 +115,3 @@
 ## 貢献
 
 バグ報告や機能提案は、GitHubのIssuesページでお願いします。プルリクエストも歓迎します。
-# image_translation_tool
