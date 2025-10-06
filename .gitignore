@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build artifacts
+node_modules
+dist
+.env.local
+output
+.markdownlint.json
+.gemini
