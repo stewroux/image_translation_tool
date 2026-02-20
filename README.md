@@ -1,117 +1,96 @@
-# 画像日本語翻訳ツール
+# 画像日本語翻訳ツール / Image Japanese Translator
 
-日本語のテキストが含まれる画像をアップロードして、AIが自動的に英語に翻訳するWebアプリケーションです。Google Gemini APIを使用してOCR（光学文字認識）と翻訳を行い、翻訳結果を元の画像上に重ねて表示します。
+![Version](https://img.shields.io/badge/version-v1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38B2AC?logo=tailwindcss&logoColor=white)
 
-## 主な機能
+<div align="center">
+  <!-- TODO: プロジェクトのロゴやデモGIFを配置してください -->
+  <img src="https://placehold.co/800x400/1e293b/6366f1?text=Image+Japanese+Translator+Demo" alt="App Demo" width="100%">
+</div>
 
-### 🖼️ 画像アップロード
+## Description / Overview
+**「誰もが直感的に、画像内の日本語を英語に翻訳し、レイアウトを保ったまま画像として保存できる体験を提供する」**
 
-- ドラッグ&ドロップまたはクリックで画像をアップロード
-- PNG、JPG、GIF形式に対応
-- 最大10MBまでのファイルサイズをサポート
+インターネット上の画像やマンガ、スクリーンショットに含まれる日本語テキストを、AI（Google Gemini 2.5 Flash）が自動で検出・翻訳し、元のレイアウト上にシームレスに合成表示するWebアプリケーションです。
 
-### 🔍 OCR & 翻訳
+> **Note**: 現在、本アプリケーションはローカル開発環境での利用を前提としています。利用にはご自身の Google Gemini API キーが必要となります。
 
-- Google Gemini AIを使用した高精度な日本語テキスト認識
-- 自動的な英語翻訳
-- テキストの位置情報（バウンディングボックス）を正確に検出
+---
 
-### ✏️ インタラクティブ編集
+## Features
 
-- 翻訳されたテキストブロックをクリックして選択
-- ドラッグ&ドロップでテキストの位置を調整
-- ハンドルを使ってテキストボックスのサイズを変更
-- 背景色に応じた自動的なテキスト色調整
+- 🖼️ **スマート画像読み込み**: ドラッグ＆ドロップで素早く画像を読み込み。AIが画像内容を分析し、最適なファイル名を自動提案。
+- 🔍 **高精度なOCR & 翻訳**: Google Gemini AIを使用し、日本語テキストを高精度で検出し、文脈に沿った自然な英語へ自動翻訳。
+- ✏️ **直感的なキャンバス編集**: 翻訳されたテキストブロックをマウスクリックで選択し、ドラッグでの位置調整や角のハンドルを使ったリサイズが可能。元の画像背景に応じた文字色・背景色の自動調整機能付き。
+- 📁 **多彩なエクスポート機能**: 10%〜100%の画質調整に加え、オリジナルサイズのほか、HD、Full HD、4K、さらには各種SNS（Twitter, Instagram等）向けのプリセットサイズでのダウンロードに対応。
+- 🔒 **セキュアな設計**: 処理はすべてブラウザとGoogle間で行われ、画像やデータが中間サーバーに保存されることはありません。
 
-### 📁 カスタマイズ可能なエクスポート
+---
 
-- **自動ファイル名生成**: AIが画像内容を分析して適切なファイル名を提案
-- **ファイル名編集**: 提案されたファイル名を自由に編集可能
-- **出力サイズ選択**:
-  - オリジナルサイズ
-  - HD (1280x720)
-  - Full HD (1920x1080)
-  - 4K (3840x2160)
-  - Instagram正方形 (1080x1080)
-  - Twitter画像 (1200x675)
-  - カスタムサイズ（幅・高さを個別指定）
-- **画質調整**: 10%〜100%の範囲で画質を調整可能
+## Requirement
 
-## 技術スタック
+- **Node.js**: v18以上を推奨
+- **Google Gemini API Key**: APIを利用するために必須
 
-- **フロントエンド**: React + TypeScript
-- **ビルドツール**: Vite
-- **スタイリング**: Tailwind CSS
-- **AI API**: Google Gemini 2.5 Flash
-- **画像処理**: HTML5 Canvas API
+---
 
-## セットアップ
+## Installation
 
-### 前提条件
+リポジトリをクローンし、必要な依存関係をインストールします。
 
-- Node.js (推奨バージョン: 18以上)
-- Google Gemini API キー
+```bash
+# 1. リポジトリのクローン（例）
+git clone <repository-url>
+cd 画像日本語翻訳ツール_2
 
-### インストール手順
+# 2. 依存関係のインストール
+npm install
 
-1. **依存関係のインストール**:
+# 3. 環境変数の設定
+# .env.local ファイルを作成し、Gemini APIキーを設定してください。
+echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
+```
 
-   ```bash
-   npm install
-   ```
+---
 
-2. **環境変数の設定**:
-   `.env.local`ファイルにGemini API キーを設定してください：
+## Usage
 
-   ```bash
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-
-3. **開発サーバーの起動**:
-
+1. **開発サーバーの起動**
    ```bash
    npm run dev
    ```
+2. ブラウザで `http://localhost:5173` （デフォルト）を開きます。
+3. **ブラウザ上の操作**:
+   - 画面の「クリックしてアップロード」エリアに画像をドラッグ＆ドロップします。
+   - 「画像を翻訳」ボタンをクリックして翻訳を開始します。
+   - 処理完了後、プレビュー上でテキストブロックをドラッグ・リサイズして好みのレイアウトに微調整します。
+   - 画面右下の「エクスポート設定」から出力サイズ等を選び、「画像をダウンロード」ボタンで保存します。
 
-4. **ビルド**:
+---
 
-   ```bash
-   npm run build
-   ```
+## Contributing
 
-## 使用方法
+Pull Request や Issue はいつでも歓迎します！
+新しい機能の提案、バグの報告、コードの改善など、どなたからの貢献もお待ちしております。
 
-1. **画像のアップロード**
-   - 「クリックしてアップロード」ボタンをクリックするか、画像ファイルをドラッグ&ドロップ
-   - アップロード後、AIが自動的に画像の内容を分析してファイル名を生成
+1. このリポジトリを Fork する
+2. 機能追加用のブランチを作成する (`git checkout -b feature/amazing-feature`)
+3. 変更をコミットする (`git commit -m 'Add some amazing feature'`)
+4. ブランチに Push する (`git push origin feature/amazing-feature`)
+5. Pull Request を作成する
 
-2. **翻訳の実行**
-   - 「画像を翻訳」ボタンをクリック
-   - AIが日本語テキストを検出し、英語に翻訳
+---
 
-3. **結果の調整**
-   - 翻訳されたテキストブロックをクリックして選択
-   - ドラッグして位置を調整
-   - 角のハンドルをドラッグしてサイズを変更
+## Author
 
-4. **エクスポート設定**
-   - ファイル名を編集（デフォルトはAI生成）
-   - 出力サイズを選択（プリセットまたはカスタム）
-   - 必要に応じて画質を調整
+- **開発者**: Ryoma Sato (or Your Name)
+- ご不明な点やフィードバックがあれば、Issueを通じてお知らせください。
 
-5. **ダウンロード**
-   - 「画像をダウンロード」ボタンをクリックして完成した画像を保存
+---
 
-## API制限事項
+## License
 
-- Google Gemini APIの利用制限に従います
-- 大きな画像ファイルは処理時間が長くなる場合があります
-- API呼び出し回数に応じて料金が発生する場合があります
-
-## ライセンス
-
-このプロジェクトはMITライセンスの下で公開されています。
-
-## 貢献
-
-バグ報告や機能提案は、GitHubのIssuesページでお願いします。プルリクエストも歓迎します。
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
