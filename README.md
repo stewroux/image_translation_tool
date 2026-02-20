@@ -42,9 +42,9 @@
 リポジトリをクローンし、必要な依存関係をインストールします。
 
 ```bash
-# 1. リポジトリのクローン（例）
-git clone <repository-url>
-cd 画像日本語翻訳ツール_2
+# 1. リポジトリのクローン
+git clone https://github.com/stewroux/image_translation_tool.git
+cd image_translation_tool
 
 # 2. 依存関係のインストール
 npm install
