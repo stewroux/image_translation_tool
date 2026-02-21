@@ -1,11 +1,14 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { TranslationBlock } from '../types';
 
-if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Helper to get an initialized AI instance
+const getAiClient = (customApiKey?: string) => {
+    const apiKey = customApiKey || (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_GEMINI_API_KEY : undefined);
+    if (!apiKey) {
+        throw new Error("APIキーが設定されていません。設定画面からGemini APIキーを入力してください。");
+    }
+    return new GoogleGenAI({ apiKey });
+};
 
 const responseSchema = {
     type: Type.ARRAY,
@@ -35,8 +38,10 @@ const responseSchema = {
     },
 };
 
-export const translateImageText = async (base64Image: string, mimeType: string): Promise<TranslationBlock[]> => {
+export const translateImageText = async (base64Image: string, mimeType: string, customApiKey?: string): Promise<TranslationBlock[]> => {
     try {
+        const ai = getAiClient(customApiKey);
+
         const imagePart = {
             inlineData: {
                 data: base64Image,
@@ -77,8 +82,10 @@ export const translateImageText = async (base64Image: string, mimeType: string):
     }
 };
 
-export const generateImageSummary = async (base64Image: string, mimeType: string): Promise<string> => {
+export const generateImageSummary = async (base64Image: string, mimeType: string, customApiKey?: string): Promise<string> => {
     try {
+        const ai = getAiClient(customApiKey);
+
         const imagePart = {
             inlineData: {
                 data: base64Image,

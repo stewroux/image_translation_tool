@@ -149,15 +149,23 @@ export const ResultDisplay: React.FC<{
       ctx.fillText(t.englishText, rectX + rectWidth / 2, rectY + rectHeight / 2);
 
       if (index === selectedIndex) {
-        ctx.strokeStyle = '#38BDF8'; // Light blue
-        ctx.lineWidth = 2;
+        ctx.save();
+        ctx.shadowColor = 'rgba(99, 102, 241, 0.6)';
+        ctx.shadowBlur = 12;
+        ctx.strokeStyle = '#818CF8'; // Indigo-400
+        ctx.lineWidth = 3;
         ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+        ctx.restore();
 
-        const handleOffset = HANDLE_SIZE / 2;
         HANDLES.forEach(handle => {
           const [x, y] = getHandleCoords(box, handle, canvas.width, canvas.height);
-          ctx.fillStyle = '#38BDF8';
-          ctx.fillRect(x - handleOffset, y - handleOffset, HANDLE_SIZE, HANDLE_SIZE);
+          ctx.beginPath();
+          ctx.arc(x, y, HANDLE_SIZE / 1.5, 0, 2 * Math.PI);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#818CF8';
+          ctx.stroke();
         });
       }
     });
@@ -187,7 +195,7 @@ export const ResultDisplay: React.FC<{
 
   // 変換可能な単位があるかチェック
   useEffect(() => {
-    const hasUnits = translations.some(t => 
+    const hasUnits = translations.some(t =>
       getAvailableConversions(t.englishText).length > 0
     );
     setHasConvertibleUnits(hasUnits);
@@ -485,79 +493,92 @@ export const ResultDisplay: React.FC<{
   }
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-slate-200">3. 調整とダウンロード</h2>
-        {hasConvertibleUnits && (
-          <button
-            onClick={() => setShowUnitConverter(!showUnitConverter)}
-            className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-            </svg>
-            単位変換
-          </button>
-        )}
-      </div>
-      <p className="text-slate-400 mb-6 text-center">テキストブロックをクリックして選択し、ドラッグして移動、ハンドルでサイズを変更できます。</p>
-
-      {/* 単位変換パネル */}
-      {showUnitConverter && (
-        <div className="mb-6 p-4 bg-purple-900/20 border border-purple-500/30 rounded-lg">
-          <h3 className="text-lg font-semibold text-purple-200 mb-3">単位変換</h3>
-          <p className="text-purple-300 text-sm mb-4">
-            画像内の単位を以下のように変換します：
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-purple-200 mb-4">
-            <div>cm → inch</div>
-            <div>mm → inch</div>
-            <div>m → ft</div>
-            <div>km → mile</div>
-            <div>g → oz</div>
-            <div>kg → lb</div>
-            <div>°C → °F</div>
-            <div>ml → fl oz</div>
+    <div className="w-full flex justify-center">
+      <div className="w-full max-w-6xl">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 text-sm font-bold">3</span>
+            <h2 className="text-2xl font-bold text-slate-100">調整とエクスポート</h2>
           </div>
-          <div className="flex gap-3">
+          {hasConvertibleUnits && (
             <button
-              onClick={handleUnitConversion}
-              className="px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors"
+              onClick={() => setShowUnitConverter(!showUnitConverter)}
+              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-purple-500 text-slate-200 text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             >
-              変換を実行
+              <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              単位変換ツール
             </button>
-            <button
-              onClick={() => setShowUnitConverter(false)}
-              className="px-4 py-2 bg-slate-600 text-white text-sm rounded-md hover:bg-slate-700 transition-colors"
-            >
-              キャンセル
-            </button>
-          </div>
+          )}
         </div>
-      )}
+        <p className="text-slate-400 mb-8 max-w-2xl text-sm leading-relaxed">
+          AIが翻訳したテキストブロックをクリックして選択し、ドラッグで移動、丸いハンドルでサイズを変更できます。
+        </p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Canvas area */}
-        <div className="lg:col-span-2">
-          <div className="w-full p-2 bg-slate-800 rounded-lg shadow-lg" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-            <canvas
-              ref={canvasRef}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              className="w-full h-auto rounded-md"
-              style={{ cursor: cursorStyle }}
+        {/* 単位変換パネル */}
+        {showUnitConverter && (
+          <div className="mb-8 p-6 bg-purple-900/10 border border-purple-500/30 rounded-2xl shadow-inner backdrop-blur-sm animate-fade-in-up">
+            <h3 className="text-lg font-bold text-purple-200 mb-2 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              スマート単位変換
+            </h3>
+            <p className="text-purple-300/80 text-sm mb-5">
+              画像内に検出された以下の単位を、ワンクリックで変換します。
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm text-purple-200 mb-6 bg-slate-900/30 p-4 rounded-xl border border-slate-700/50">
+              <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>cm → inch</div>
+              <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>mm → inch</div>
+              <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>m → ft</div>
+              <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>km → mile</div>
+              <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>g → oz</div>
+              <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>kg → lb</div>
+              <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>°C → °F</div>
+              <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>ml → fl oz</div>
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={handleUnitConversion}
+                className="px-6 py-2.5 bg-purple-600 text-white font-medium rounded-xl shadow-lg shadow-purple-500/20 hover:bg-purple-500 hover:shadow-purple-500/40 transition-all duration-300 transform hover:-translate-y-0.5"
+              >
+                一括変換を実行
+              </button>
+              <button
+                onClick={() => setShowUnitConverter(false)}
+                className="px-6 py-2.5 bg-slate-700 text-slate-200 font-medium rounded-xl hover:bg-slate-600 transition-all duration-300"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {/* Canvas area */}
+          <div className="w-full lg:w-2/3">
+            <div className="w-full p-2 bg-slate-900/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-700/50 backdrop-blur-sm relative" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+              <div className="absolute inset-0 bg-transparent pointer-events-none rounded-2xl shadow-inner" />
+              <canvas
+                ref={canvasRef}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                className="w-full h-auto rounded-xl ring-1 ring-slate-800"
+                style={{ cursor: cursorStyle }}
+              />
+            </div>
+          </div>
+
+          {/* Export settings */}
+          <div className="w-full lg:w-1/3 sticky top-8">
+            <ExportSettings
+              settings={exportSettings}
+              onSettingsChange={setExportSettings}
+              onExport={handleDownload}
+              isGeneratingFilename={isGeneratingFilename}
             />
           </div>
-        </div>
-
-        {/* Export settings */}
-        <div className="lg:col-span-1">
-          <ExportSettings
-            settings={exportSettings}
-            onSettingsChange={setExportSettings}
-            onExport={handleDownload}
-            isGeneratingFilename={isGeneratingFilename}
-          />
         </div>
       </div>
     </div>
