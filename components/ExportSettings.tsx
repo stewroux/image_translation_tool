@@ -123,16 +123,13 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/40 p-6 sm:p-8 rounded-2xl border border-slate-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-md relative overflow-hidden space-y-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm relative overflow-hidden space-y-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
       {/* Decorative top border */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-indigo-500 to-purple-500" />
 
-      <h3 className="text-xl font-bold text-slate-100 flex items-center gap-3">
-        <span className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
+      <h3 className="text-xl font-bold flex items-center gap-3 text-slate-800 dark:text-slate-100">
+        <span className="p-2 bg-primary/10 rounded-lg text-primary">
+          <span className="material-icons-outlined">settings</span>
         </span>
         設定と保存
       </h3>
@@ -140,7 +137,7 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
       <div className="space-y-5">
         {/* ファイル名設定 */}
         <div className="group">
-          <label className="block text-xs font-semibold tracking-wide text-slate-400 uppercase mb-2 group-focus-within:text-indigo-400 transition-colors">
+          <label className="block text-xs font-semibold tracking-wide text-slate-500 dark:text-slate-400 uppercase mb-2 group-focus-within:text-primary transition-colors">
             ファイル名
           </label>
           <div className="flex items-center space-x-2">
@@ -148,11 +145,11 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
               type="text"
               value={settings.filename}
               onChange={(e) => handleFilenameChange(e.target.value)}
-              className="flex-1 px-4 py-2.5 bg-slate-800/80 text-white rounded-xl border border-slate-600/50 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-400 focus:outline-none transition-all shadow-inner placeholder-slate-500"
+              className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-white rounded-xl border border-border-light dark:border-slate-700 focus:ring-2 focus:ring-primary/50 focus:border-primary focus:outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500"
               placeholder="ファイル名を入力"
               disabled={isGeneratingFilename}
             />
-            <span className="text-slate-500 font-medium px-2">.png</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium px-2">.png</span>
           </div>
           {isGeneratingFilename && (
             <p className="text-xs text-indigo-400 mt-2 flex items-center gap-1.5 animate-pulse">
@@ -167,7 +164,7 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
 
         {/* サイズプリセット */}
         <div className="group">
-          <label className="block text-xs font-semibold tracking-wide text-slate-400 uppercase mb-2 group-focus-within:text-purple-400 transition-colors">
+          <label className="block text-xs font-semibold tracking-wide text-slate-500 dark:text-slate-400 uppercase mb-2 group-focus-within:text-primary transition-colors">
             出力サイズ
           </label>
           <div className="relative">
@@ -192,9 +189,9 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
                   if (preset) handleSizePresetChange(preset);
                 }
               }}
-              className="w-full px-4 py-2.5 bg-slate-800/80 text-white rounded-xl border border-slate-600/50 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 focus:outline-none transition-all appearance-none cursor-pointer shadow-inner pr-10"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-white rounded-xl border border-border-light dark:border-slate-700 focus:ring-2 focus:ring-primary/50 focus:border-primary focus:outline-none transition-all appearance-none cursor-pointer pr-10"
             >
-              <optgroup label="デフォルトサイズ" className="bg-slate-800">
+              <optgroup label="デフォルトサイズ" className="bg-white dark:bg-slate-800">
                 {DEFAULT_PRESET_SIZES.map((preset) => (
                   <option key={`${preset.name}-${preset.width}x${preset.height}`} value={preset.width === 0 ? 'original' : `${preset.width}x${preset.height}`}>
                     {preset.name}
@@ -203,7 +200,7 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
               </optgroup>
 
               {customPresets.length > 0 && (
-                <optgroup label="保存したカスタムサイズ" className="bg-slate-800">
+                <optgroup label="保存したカスタムサイズ" className="bg-white dark:bg-slate-800">
                   {customPresets.map((preset) => (
                     <option key={`custom-${preset.name}-${preset.width}x${preset.height}`} value={`${preset.width}x${preset.height}`}>
                       {preset.name}
@@ -212,9 +209,9 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
                 </optgroup>
               )}
 
-              <option value="custom" className="bg-slate-800 font-semibold text-purple-300">カスタムサイズを設定...</option>
+              <option value="custom" className="bg-white dark:bg-slate-800 font-semibold text-primary">カスタムサイズを設定...</option>
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 dark:text-slate-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
@@ -222,15 +219,15 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
 
         {/* カスタムプリセット管理 */}
         {customPresets.length > 0 && (
-          <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-border-light dark:border-slate-700/50">
             <label className="block text-[10px] font-semibold tracking-wider text-slate-500 uppercase mb-2 px-1">
               保存済みカスタム設定
             </label>
             <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
               {customPresets.map((preset) => (
-                <div key={`${preset.name}-${preset.width}x${preset.height}`} className="flex items-center justify-between bg-slate-700/50 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-sm transition-colors border border-slate-600/30">
-                  <span className="text-slate-300 flex items-center gap-2">
-                    <svg className="w-3 h-3 text-purple-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                <div key={`${preset.name}-${preset.width}x${preset.height}`} className="flex items-center justify-between bg-white dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg text-sm transition-colors border border-border-light/50 dark:border-slate-600/30">
+                  <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <svg className="w-3 h-3 text-primary" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                     {preset.name} <span className="text-slate-500 text-xs ml-1">({preset.width}x{preset.height})</span>
                   </span>
                   <button
@@ -248,30 +245,30 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
 
         {/* カスタムサイズ入力 */}
         {isCustomSize() && (
-          <div className="p-4 bg-slate-800/40 rounded-xl border border-indigo-500/20 shadow-inner space-y-4 animate-fade-in-up">
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-primary/20 space-y-4 animate-fade-in-up">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                  幅 <span className="text-slate-500 text-[10px] uppercase">(px)</span>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                  幅 <span className="text-slate-400 dark:text-slate-500 text-[10px] uppercase">(px)</span>
                 </label>
                 <input
                   type="number"
                   value={settings.width === 0 ? '' : settings.width}
                   onChange={(e) => handleCustomSizeChange('width', e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-900/50 text-white rounded-lg border border-slate-600/50 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400 focus:outline-none transition-all text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900/50 text-slate-800 dark:text-white rounded-lg border border-border-light dark:border-slate-600/50 focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-all text-sm"
                   min="1"
                   placeholder="幅を入力"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                  高さ <span className="text-slate-500 text-[10px] uppercase">(px)</span>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                  高さ <span className="text-slate-400 dark:text-slate-500 text-[10px] uppercase">(px)</span>
                 </label>
                 <input
                   type="number"
                   value={settings.height === 0 ? '' : settings.height}
                   onChange={(e) => handleCustomSizeChange('height', e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-900/50 text-white rounded-lg border border-slate-600/50 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400 focus:outline-none transition-all text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900/50 text-slate-800 dark:text-white rounded-lg border border-border-light dark:border-slate-600/50 focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-all text-sm"
                   min="1"
                   placeholder="高さを入力"
                 />
@@ -284,21 +281,21 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
                 {!showSaveDialog ? (
                   <button
                     onClick={() => setShowSaveDialog(true)}
-                    className="w-full flex justify-center items-center gap-2 py-2 text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-medium rounded-lg border border-indigo-500/20 hover:border-indigo-500/40 transition-all"
+                    className="w-full flex justify-center items-center gap-2 py-2 text-primary bg-primary/10 hover:bg-primary/20 text-xs font-medium rounded-lg border border-primary/20 hover:border-primary/40 transition-all"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
                     このサイズをプリセットに保存
                   </button>
                 ) : (
-                  <div className="space-y-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 animate-fade-in">
+                  <div className="space-y-3 p-3 bg-white dark:bg-slate-900/50 rounded-lg border border-border-light dark:border-slate-700/50 animate-fade-in">
                     <div>
-                      <label className="block text-[10px] font-medium text-slate-400 mb-1.5">プリセット名</label>
+                      <label className="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-1.5">プリセット名</label>
                       <input
                         type="text"
                         value={presetName}
                         onChange={(e) => setPresetName(e.target.value)}
                         placeholder="例: 私のブログ用"
-                        className="w-full px-3 py-2 bg-slate-800 text-white rounded-lg border border-slate-600 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-400 focus:outline-none text-sm shadow-inner"
+                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg border border-border-light dark:border-slate-600 focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none text-sm"
                         onKeyPress={(e) => e.key === 'Enter' && handleSavePreset()}
                         autoFocus
                       />
@@ -307,7 +304,7 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
                       <button
                         onClick={handleSavePreset}
                         disabled={!presetName.trim()}
-                        className="flex-1 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md shadow-sm hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none transition-all"
+                        className="flex-1 py-1.5 bg-primary text-white text-xs font-medium rounded-md shadow-sm hover:bg-primary-hover disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none transition-all"
                       >
                         保存
                       </button>
@@ -316,7 +313,7 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
                           setShowSaveDialog(false);
                           setPresetName('');
                         }}
-                        className="flex-1 py-1.5 bg-slate-700 text-slate-300 text-xs font-medium rounded-md hover:bg-slate-600 transition-all border border-slate-600/50"
+                        className="flex-1 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-md hover:bg-slate-200 dark:hover:bg-slate-600 transition-all border border-border-light dark:border-slate-600/50"
                       >
                         キャンセル
                       </button>
@@ -329,27 +326,22 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
         )}
 
         {/* 詳細設定 */}
-        <div className="pt-2 border-t border-slate-700/50">
+        <div className="pt-2 border-t border-border-light dark:border-slate-700/50">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors w-full group"
+            className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors w-full group mt-2"
           >
-            <svg
-              className={`w-4 h-4 transition-transform duration-300 ${showAdvanced ? 'rotate-90' : ''}`}
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            高度な設定 (DPI)
+            <span className="material-icons-outlined text-sm">tune</span>
+            高度な設定 (DPI等)
           </button>
 
           {showAdvanced && (
-            <div className="mt-4 p-4 bg-slate-800/40 rounded-xl border border-slate-700/50 animate-fade-in-up">
+            <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-border-light dark:border-slate-700/50 animate-fade-in-up">
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-medium text-slate-300">
-                  解像度 <span className="text-slate-500 uppercase ml-1">(DPI)</span>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+                  解像度 <span className="text-slate-400 dark:text-slate-500 uppercase ml-1">(DPI)</span>
                 </label>
-                <span className="text-sm font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded shadow-inner">{settings.dpi}</span>
+                <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">{settings.dpi}</span>
               </div>
 
               <div className="relative py-2">
@@ -360,7 +352,7 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
                   step="1"
                   value={settings.dpi}
                   onChange={(e) => handleDpiChange(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
               </div>
               <div className="flex justify-between text-[10px] font-medium text-slate-500 mt-1 px-1">
@@ -377,18 +369,13 @@ export const ExportSettings: React.FC<ExportSettingsProps> = ({
       <div className="pt-4 pb-2">
         <button
           onClick={onExport}
-          className="w-full relative group overflow-hidden"
+          className="w-full relative group overflow-hidden rounded-xl"
         >
           {/* Animated background glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 rounded-xl blur-md opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 opacity-90 group-hover:opacity-100 transition-opacity duration-500" />
 
-          <div className="relative px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-lg rounded-xl shadow-[0_4px_15px_rgba(16,185,129,0.3)] border border-emerald-400/30 flex items-center justify-center gap-3 transform group-hover:-translate-y-0.5 group-hover:shadow-[0_10px_40px_-10px_rgba(16,185,129,0.7)] transition-all duration-300">
-            {/* Inner shimmer */}
-            <div className="absolute inset-0 -translate-x-[150%] group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
-
-            <svg className="w-6 h-6 animate-[bounce_2s_infinite]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
+          <div className="relative px-6 py-4 text-white font-bold text-lg flex items-center justify-center gap-3 transform group-hover:-translate-y-0.5 transition-all duration-300">
+            <span className="material-icons-outlined animate-bounce">download</span>
             画像を保存
           </div>
         </button>

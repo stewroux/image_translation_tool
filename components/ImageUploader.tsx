@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { UploadIcon } from './icons';
 
 interface ImageUploaderProps {
   onImageSelect: (file: File) => void;
@@ -26,9 +25,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, pre
     }
 
     // Validate type (PNG, JPG, GIF)
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      alert('エラー: 対応していないファイル形式です（PNG, JPG, GIFのみ可）');
+      alert('エラー: 対応していないファイル形式です（PNG, JPG, GIF, WebPのみ可）');
       return;
     }
 
@@ -62,7 +61,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, pre
 
   return (
     <div
-      className="w-full h-full min-h-[16rem]"
+      className="w-full h-full min-h-[16rem] flex flex-col"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -76,42 +75,36 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, pre
       />
       {previewUrl ? (
         <div
-          className="w-full h-full min-h-[16rem] cursor-pointer group relative rounded-xl overflow-hidden shadow-lg border-2 border-slate-700 hover:border-indigo-400 transition-all duration-300 flex items-center justify-center bg-slate-900/50"
+          className="aspect-video bg-slate-100 dark:bg-slate-900 rounded-lg overflow-hidden flex items-center justify-center relative group cursor-pointer border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary dark:hover:border-primary transition-colors h-full w-full"
           onClick={handleClick}
         >
-          <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
-            <UploadIcon className="w-10 h-10 text-white mb-2" />
-            <p className="text-white font-medium">画像を変更する</p>
-          </div>
           <img
             src={previewUrl}
             alt="Selected preview"
-            className="w-full h-full max-h-[400px] object-contain group-hover:scale-[1.02] transition-transform duration-500"
+            className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity"
           />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="bg-white/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 px-3 py-1 rounded text-sm shadow-sm group-hover:scale-105 transition-transform">変更する</span>
+          </div>
         </div>
       ) : (
         <div
           onClick={handleClick}
-          className={`w-full h-full min-h-[16rem] border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 group ${isDragging
-            ? 'border-indigo-400 bg-indigo-500/10 scale-[1.02] shadow-[0_0_20px_rgba(99,102,241,0.2)]'
-            : 'border-slate-600 hover:border-indigo-400 hover:bg-slate-800/80 hover:shadow-lg'
+          className={`flex-grow flex flex-col justify-center items-center border-2 border-dashed rounded-lg p-8 transition-colors cursor-pointer group ${isDragging
+              ? 'border-primary bg-primary/10'
+              : 'border-indigo-200 dark:border-indigo-900/50 hover:border-indigo-400 dark:hover:border-indigo-700 bg-white dark:bg-[#0f172a]'
             }`}
         >
-          <div className={`p-4 rounded-full transition-colors duration-300 ${isDragging ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-300'}`}>
-            <UploadIcon />
+          <div className="w-16 h-16 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+            <span className="material-icons-outlined text-3xl">cloud_upload</span>
           </div>
-          <h3 className="mt-4 text-lg font-medium text-slate-200">
-            {isDragging ? 'ドロップしてアップロード' : '画像ファイルを選択'}
-          </h3>
-          <p className="mt-2 text-sm text-slate-400 text-center max-w-[80%]">
-            <span className="font-semibold text-indigo-400 group-hover:text-indigo-300 transition-colors">クリックして参照</span>
-            またはドラッグ＆ドロップ
-          </p>
-          <div className="mt-4 flex gap-2 text-xs font-medium text-slate-500">
-            <span className="px-2 py-1 bg-slate-800 rounded">PNG</span>
-            <span className="px-2 py-1 bg-slate-800 rounded">JPG</span>
-            <span className="px-2 py-1 bg-slate-800 rounded">GIF</span>
-            <span className="px-2 py-1 bg-slate-800 rounded">最大 10MB</span>
+          <p className="font-bold text-gray-700 dark:text-gray-200 mb-2">画像ファイルを選択</p>
+          <p className="text-sm text-indigo-600 dark:text-indigo-400 mb-4">クリックして参照<span className="text-gray-500 dark:text-gray-500"> またはドラッグ＆ドロップ</span></p>
+          <div className="flex gap-2 flex-wrap justify-center">
+            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs rounded">PNG</span>
+            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs rounded">JPG</span>
+            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs rounded">GIF</span>
+            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs rounded">最大 10MB</span>
           </div>
         </div>
       )}
