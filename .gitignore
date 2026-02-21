@@ -31,3 +31,5 @@ output
 .markdownlint.json
 .gemini
 .next
+images
+build_output.txt
