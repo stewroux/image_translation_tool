@@ -169,7 +169,7 @@ export const ResultDisplay: React.FC<{
         });
       }
     });
-  }, [translations, selectedIndex, canvasSize]);
+  }, [translations, selectedIndex]);
 
   useEffect(() => {
     const img = new Image();
