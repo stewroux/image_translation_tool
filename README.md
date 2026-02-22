@@ -2,41 +2,48 @@
 
 Providing a seamless experience where anyone can intuitively translate Japanese text within images to English and save the result as an image while preserving the original layout.
 
-This is a web application that automatically detects and translates Japanese text found in images, manga, or screenshots using AI (Google Gemini 2.5 Flash), and seamlessly composites the translated English text back onto the original layout.
-
 ![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15.1.12-000000?logo=next.js&logoColor=white.svg)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black.svg)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38B2AC?logo=tailwindcss&logoColor=white.svg)
-
-[🇯🇵 日本語 (Japanese)](./README_ja.md)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-38B2AC?logo=tailwindcss&logoColor=white.svg)
+![Gemini](https://img.shields.io/badge/Gemini-AI-orange?logo=google-gemini&logoColor=white.svg)
 
 <div align="center">
   <img src="images/app-light-mode.png" alt="App Light Mode" width="80%">
-  <img src="images/app-dark-mode.png" alt="App Dark Mode" width="80%">
 </div>
+
+[🇯🇵 日本語 (Japanese)](./README_ja.md)
+
+## Overview
+
+**Image Japanese Translator** is a professional-grade web application that automatically detects and translates Japanese text found in images, manga, or screenshots using Google Gemini AI models. It seamlessly composites the translated English text back onto the original layout, allowing users to adjust position, size, and export quality with zero design skills required.
+
+> **Note**: This project is built for high-accuracy translation and layout preservation, specifically optimized for Japanese-to-English manga and technical document translation.
 
 ## Key Features
 
-- 🖼️ **Smart Image Loading**: Quickly load images via drag and drop.
-- 🔍 **High-Accuracy OCR & Translation**: Utilizes Google Gemini AI to accurately detect Japanese text and translate it into natural, context-aware English.
-- ✏️ **Intuitive Canvas Editing**: Select translated text blocks with a mouse click to drag them for position adjustment or use corner handles to resize them.
-- 📁 **Versatile Export Functions**: Supports adjusting image quality from 10% to 100%, and downloading in original size, HD, Full HD, 4K, as well as preset sizes for various SNS platforms.
-- 🔒 **Secure Design**: All processing is done between the browser and Google API.
+- 🚀 **Zero-Config OCR & Translation**: Leverages Google Gemini 2.0 Flash for ultra-fast, context-aware translation.
+- 🎨 **Interactive Canvas Editor**: Intuitive drag-and-drop movement and corner-handle resizing of translated text blocks.
+- 📐 **Smart Layout Preservation**: AI-assisted background color estimation ensures translated text blends naturally with the original image.
+- 📁 **Pro-Grade Export**: Presets for 4K, HD, and SNS (Twitter/X, etc.), with adjustable JPEG/PNG quality from 10% to 100%.
+- ⚖️ **Unit Converter**: Specialized tool for converting units found in technical diagrams (cm to inch, km to mile, etc.).
+- 🔒 **Privacy First**: Client-side processing ensures your images are only sent to Google Gemini and are never stored on our servers.
 
 ## Tech Stack
 
-- **Framework**: Next.js 15+ (React 19)
-- **Styling**: Tailwind CSS v4
-- **AI/LLM**: Google Gemini API (`@google/genai`)
-- **Deployment**: Next.js compatible hosting (e.g., Vercel)
+- **Frontend**: [Next.js 15.1.12](https://nextjs.org/) (App Router)
+- **UI Logic**: [React 19](https://react.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **AI Engine**: [Google Gemini API](https://ai.google.dev/) (`@google/genai`)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Deployment**: [Vercel](https://vercel.com/) (Recommended)
 
 ## Prerequisites
 
-- Node.js 18 or higher
-- npm, pnpm, or yarn
-- A Google Gemini API Key
+- **Node.js**: 20.x or higher (LTS recommended)
+- **Package Manager**: `npm` (v10+) or `pnpm`
+- **API Key**: A valid [Google Gemini API Key](https://aistudio.google.com/app/apikey)
 
 ## Getting Started
 
@@ -55,13 +62,12 @@ npm install
 
 ### 3. Environment Setup
 
-Create a `.env.local` file at the root of the project:
+Create a `.env.local` file in the root directory:
 
 ```bash
-echo "NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
+# Required for translation features
+NEXT_PUBLIC_GEMINI_API_KEY=your_actual_api_key_here
 ```
-
-Alternatively, you can provide the API key directly within the app's settings UI after starting the server (the key will be stored in your browser's local storage).
 
 ### 4. Start Development Server
 
@@ -71,117 +77,115 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Architecture
+---
+
+## Architecture & Data Flow
 
 ### Directory Structure
 
-```
+```text
 ├── app/
-│   ├── globals.css        # Global Tailwind styles
-│   ├── layout.tsx         # Root layout (fonts, metadata)
-│   └── page.tsx           # Main application UI and state logic
+│   ├── globals.css        # Global design tokens and Tailwind imports
+│   ├── layout.tsx         # Root layout with Google Fonts (Inter, Roboto)
+│   └── page.tsx           # Main application state and orchestration logic
 ├── components/
-│   ├── ExportSettings.tsx # Image export UI and settings
-│   ├── ImageUploader.tsx  # Drag & drop upload component
-│   ├── ProgressBar.tsx    # Translation progress indicator
-│   ├── ResultDisplay.tsx  # Canvas implementation for moving translated text
-│   └── SettingsModal.tsx  # API key configuration modal
+│   ├── ImageUploader.tsx  # Optimized drag & drop zone with next/image preview
+│   ├── ExportSettings.tsx # Precision control panel for output dimensions/quality
+│   ├── ProgressBar.tsx    # Multi-stage visual feedback for AI processing
+│   ├── ResultDisplay.tsx  # High-performance HTML5 Canvas interaction layer
+│   └── SettingsModal.tsx  # In-browser API key management (via LocalStorage)
 ├── services/
-│   └── geminiService.ts   # Integration with Google Gemini API
-├── types/
-│   └── index.ts           # TypeScript type definitions
-└── public/                # Static assets
+│   └── geminiService.ts   # Advanced Prompt Engineering for Gemini structured OCR
+├── utils/
+│   └── unitConverter.ts   # Regex-based measurement unit detection and conversion
+└── public/                # Static assets and icons
 ```
 
 ### Request Lifecycle
 
-1. User uploads an image via `ImageUploader`.
-2. Image is converted to Base64 and processed through `geminiService` running in the server environment (or client to Gemini directly).
-3. Gemini API analyzes the image, detects Japanese text bounding boxes, and returns English translations.
-4. `ResultDisplay` renders the image on an HTML5 `<canvas>` and overlays the translated text blocks.
-5. User adjusts the text blocks with the mouse and exports the final composited image.
-
-### Data Flow
-
-```
-User Upload → Base64 Encode → Gemini 2.5 Flash API → JSON Response (Boxes, Translations) → React State → Canvas Render
-```
-
-### Key Components
-
-**Canvas Interaction (`ResultDisplay.tsx`)**
-- Renders original image on canvas.
-- Renders bounding boxes and translated text based on Gemini API output.
-- Handles mouse events to drag, resize, and edit text blocks.
-
-**Gemini Integration (`geminiService.ts`)**
-- Uses `@google/genai` to send image data to the `gemini-2.5-flash` model.
-- Instructs Gemini to return a structured JSON response specifying bounding box coordinates, translated text, and estimated background colors.
-
-## Environment Variables
-
-### Optional
-
-| Variable | Description | Example |
-| --- | --- | --- |
-| `NEXT_PUBLIC_GEMINI_API_KEY` | Your Google Gemini API Key. | `AIzaSy...` |
-
-*(If this variable is not provided, the user is required to enter their API key via the settings modal within the application.)*
-
-## Available Scripts
-
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start development server |
-| `npm run build` | Build application for production |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint code checks |
-
-## Testing
-
-Currently, there are no automated tests configured for this project. Features should be manually verified by starting the development server and running a sample image translation.
-
-## Deployment
-
-### Vercel (Recommended for Next.js)
-
-The easiest way to deploy this Next.js application is to use the Vercel Platform.
-
-1. Push your code to a GitHub repository.
-2. Import your repository into Vercel.
-3. Add the `NEXT_PUBLIC_GEMINI_API_KEY` as an Environment Variable in your Vercel project settings (if providing a default key for all users is preferred over local individual input).
-4. Deploy!
-
-## Troubleshooting
-
-### API Key Required Error
-
-**Error:** The application prompts "API Key Required" and the translate button is disabled.
-
-**Solution:**
-1. Click the settings icon (⚙️) in the top right.
-2. Enter your valid Google Gemini API Key.
-3. Save the settings. Ensure you have the necessary billing enabled for your Google Cloud Project if required.
-
-### Next.js Cache Issues
-
-**Error:** `Caching failed for pack: Error: ENOENT: no such file or directory` or conflicting dev servers.
-
-**Solution:**
-Stop all running dev servers, clear the `.next` cache, and restart.
-```bash
-killall node
-rm -rf .next
-npm run dev
-```
+1. **Upload**: User drops a file (up to 10MB) into `ImageUploader`.
+2. **Analysis**: Client encodes image to Base64 and invokes `gemini-2.0-flash`.
+3. **Structured OCR**: AI returns a JSON array containing:
+    - `boundingBox`: Normalized coordinates (x, y, width, height).
+    - `japaneseText`: Original text detected.
+    - `englishText`: High-context translation.
+    - `backgroundColor`: Estimated dominant color behind the text.
+4. **Interactive Render**: `ResultDisplay` draws the image and overlays editable text blocks on the Canvas.
+5. **Modification**: User manually refines position/size/units.
+6. **Export**: Canvas is re-rendered at the target resolution and downloaded as a blob.
 
 ---
 
-## Author
+## Development Workflow
 
-- **Developer**: Ryoma Sato (or Your Name)
-- If you have any questions or feedback, please let me know via Issues.
+Our development process follows a strict 3-phase cycle to ensure code quality and performance:
 
-## License
+### Phase 1: Planning & Requirements (PRD)
+- Define scope (日英翻訳のみ, account-less).
+- Map out UX flow: Upload → Translate → Edit → Export.
+- Document in `要件定義書.md`.
 
-This project is licensed under the MIT License.
+### Phase 2: Core Logic implementation
+- Integrate `@google/genai`.
+- Implement Canvas-based interaction logic (Move/Resize).
+- Establish the `geminiService` prompt to ensure 100% JSON consistency.
+
+### Phase 3: Polish & Optimization
+- Security audits (e.g., upgrading to `next@15.1.12`).
+- Performance optimization (replacing `<img>` with `next/image`).
+- UI/UX refinements (Gradients, Glassmorphism, Responsive design).
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `NEXT_PUBLIC_GEMINI_API_KEY` | Yes* | Google Gemini API Key | - |
+
+> **Note**: If the environment variable is missing, the app will fallback to the key stored in `localStorage` via the UI Settings menu.
+
+## Available Scripts
+
+| Command | Action |
+|---------|--------|
+| `npm run dev` | Starts the development server at `localhost:3000` |
+| `npm run build` | Compiles the production build |
+| `npm run start` | Runs the production-built application |
+| `npm run lint` | Checks code for style and consistency issues |
+
+## Testing
+
+Verification is currently performed via:
+- **Build Validation**: Running `npm run build` to catch type errors and ESLint warnings.
+- **Manual QA**: Uploading standard manga/tech-doc samples to verify OCR accuracy and coordinate mapping.
+
+## Deployment
+
+### Vercel Deployment
+1. Connect this repo to [Vercel](https://vercel.com).
+2. Set the `NEXT_PUBLIC_GEMINI_API_KEY` in the project settings.
+3. Deploy. The App Router architecture works out-of-the-box.
+
+## Troubleshooting
+
+### API Key Conflict
+- **Issue**: Translation fails despite setting `.env.local`.
+- **Solution**: The UI Settings (LocalStorage) takes precedence in some environments. Click the ⚙️ icon and verify the key there.
+
+### Canvas Performance
+- **Issue**: Slow dragging on 4K images.
+- **Solution**: Resolution is downscaled for preview while maintaining original dimensions for the final export.
+
+## Contributing
+
+1. Fork the project.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
+
+## License & Author
+
+- **Developer**: Ryoma Sato
+- **License**: [MIT License](LICENSE)
