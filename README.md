@@ -188,4 +188,5 @@ Verification is currently performed via:
 ## License & Author
 
 - **Developer**: Ryoma Sato
+- **AI-Powered Development**: This project was developed with the assistance of **Google AI Studio** and **Google Antigravity**.
 - **License**: [MIT License](LICENSE)

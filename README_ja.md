@@ -190,4 +190,5 @@ npm run dev
 ## ライセンスと開発者
 
 - **開発者**: Ryoma Sato
+- **生成AIによる開発**: このプロジェクトは **Google AI Studio** および **Google Antigravity** の支援を受けて開発されました。
 - **ライセンス**: [MIT License](LICENSE)
