@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface ImageUploaderProps {
   onImageSelect: (file: File) => void;
@@ -78,10 +79,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, pre
           className="aspect-video bg-slate-100 dark:bg-slate-900 rounded-lg overflow-hidden flex items-center justify-center relative group cursor-pointer border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary dark:hover:border-primary transition-colors h-full w-full"
           onClick={handleClick}
         >
-          <img
+          <Image
             src={previewUrl}
             alt="Selected preview"
-            className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity"
+            fill
+            className="object-cover opacity-80 group-hover:opacity-60 transition-opacity"
           />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <span className="bg-white/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 px-3 py-1 rounded text-sm shadow-sm group-hover:scale-105 transition-transform">変更する</span>
