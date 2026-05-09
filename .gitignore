@@ -33,3 +33,7 @@ output
 .next
 images
 build_output.txt
+
+# Test output files
+output_test.jpg
+output_test.png

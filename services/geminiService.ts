@@ -1,13 +1,19 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { TranslationBlock } from '../types';
 
-// Helper to get an initialized AI instance
 const getAiClient = (customApiKey?: string) => {
     const apiKey = customApiKey || (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_GEMINI_API_KEY : undefined);
     if (!apiKey) {
         throw new Error("APIキーが設定されていません。設定画面からGemini APIキーを入力してください。");
     }
     return new GoogleGenAI({ apiKey });
+};
+
+const isTranslationBlockArray = (data: unknown): data is TranslationBlock[] => {
+    return Array.isArray(data) && data.every(item =>
+        typeof item === 'object' && item !== null &&
+        'japaneseText' in item && 'englishText' in item && 'boundingBox' in item
+    );
 };
 
 const responseSchema = {
@@ -74,10 +80,17 @@ export const translateImageText = async (base64Image: string, mimeType: string, 
 
         const jsonText = response.text.trim();
         const parsedJson = JSON.parse(jsonText);
-        return parsedJson as TranslationBlock[];
+
+        if (!isTranslationBlockArray(parsedJson)) {
+            throw new Error("APIレスポンスの形式が無効です。");
+        }
+
+        return parsedJson;
 
     } catch (error) {
-        console.error("Error calling Gemini API:", error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error("Error calling Gemini API:", error);
+        }
         throw new Error("画像の翻訳に失敗しました。API呼び出しでエラーが発生しました。");
     }
 };
@@ -113,7 +126,9 @@ export const generateImageSummary = async (base64Image: string, mimeType: string
         return response.text.trim();
 
     } catch (error) {
-        console.error("Error generating image summary:", error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error("Error generating image summary:", error);
+        }
         return "翻訳済み画像";
     }
 };
