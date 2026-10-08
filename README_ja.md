@@ -192,3 +192,5 @@ npm run dev
 - **開発者**: Ryoma Sato
 - **生成AIによる開発**: このプロジェクトは **Google AI Studio** および **Google Antigravity** の支援を受けて開発されました。
 - **ライセンス**: [MIT License](LICENSE)
+
+> **Security Notice**: `NEXT_PUBLIC_*` variables are embedded in the client-side JavaScript bundle and are visible to anyone who inspects the page source. Treat your Gemini API key as a low-privilege, quota-limited key and set usage quotas in Google AI Studio.

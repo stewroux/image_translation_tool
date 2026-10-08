@@ -65,3 +65,20 @@ body {
 .animate-fade-in {
    animation: fade-in 0.4s ease-out forwards;
 }
+
+/* モバイル タッチターゲット最小44px確保 */
+@media (pointer: coarse) {
+   button,
+   [role="button"],
+   input[type="file"] + label {
+      min-width: 44px;
+      min-height: 44px;
+   }
+}
+
+/* フォーカスインジケータ（キーボードナビゲーション用） */
+:focus-visible {
+   outline: 2px solid var(--color-primary);
+   outline-offset: 2px;
+   border-radius: 4px;
+}

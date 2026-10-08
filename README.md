@@ -190,3 +190,5 @@ Verification is currently performed via:
 - **Developer**: Ryoma Sato
 - **AI-Powered Development**: This project was developed with the assistance of **Google AI Studio** and **Google Antigravity**.
 - **License**: [MIT License](LICENSE)
+
+> **Security Notice**: `NEXT_PUBLIC_*` variables are embedded in the client-side JavaScript bundle and are visible to anyone who inspects the page source. Treat your Gemini API key as a low-privilege, quota-limited key and set usage quotas in Google AI Studio.

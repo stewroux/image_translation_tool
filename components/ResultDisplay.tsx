@@ -1,15 +1,22 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ExportSettings, ExportSettings as ExportSettingsType } from './ExportSettings';
-import { TranslationBlock, BoundingBox } from '../types';
-import { convertUnits, getAvailableConversions, UNIT_CONVERSIONS } from '../utils/unitConverter';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import {
+  ExportSettings,
+  ExportSettings as ExportSettingsType,
+} from "./ExportSettings";
+import { TranslationBlock, BoundingBox } from "../types";
+import {
+  convertUnits,
+  getAvailableConversions,
+  UNIT_CONVERSIONS,
+} from "../utils/unitConverter";
 
 const HANDLE_SIZE = 10;
-const HANDLES = ['tl', 'tm', 'tr', 'ml', 'mr', 'bl', 'bm', 'br'] as const;
-type HandleType = typeof HANDLES[number];
+const HANDLES = ["tl", "tm", "tr", "ml", "mr", "bl", "bm", "br"] as const;
+type HandleType = (typeof HANDLES)[number];
 
 interface MoveInteraction {
-  type: 'move';
-  handle: 'body';
+  type: "move";
+  handle: "body";
   startIndex: number;
   startX: number;
   startY: number;
@@ -17,7 +24,7 @@ interface MoveInteraction {
 }
 
 interface ResizeInteraction {
-  type: 'resize';
+  type: "resize";
   handle: HandleType;
   startIndex: number;
   startX: number;
@@ -31,7 +38,7 @@ const getAverageColorForBox = (
   ctx: CanvasRenderingContext2D,
   box: BoundingBox,
   canvasWidth: number,
-  canvasHeight: number
+  canvasHeight: number,
 ): string => {
   const rectX = box.x * canvasWidth;
   const rectY = box.y * canvasHeight;
@@ -42,7 +49,12 @@ const getAverageColorForBox = (
   const sampleOffset = 3;
   const sampleStep = 5;
 
-  const addSamplePoints = (xStart: number, yStart: number, xEnd: number, yEnd: number) => {
+  const addSamplePoints = (
+    xStart: number,
+    yStart: number,
+    xEnd: number,
+    yEnd: number,
+  ) => {
     const dx = xEnd - xStart;
     const dy = yEnd - yStart;
     const steps = Math.max(Math.abs(dx), Math.abs(dy)) / sampleStep;
@@ -51,19 +63,42 @@ const getAverageColorForBox = (
       const y = yStart + (dy * i) / steps;
       samplePoints.push({
         x: Math.round(Math.max(0, Math.min(canvasWidth - 1, x))),
-        y: Math.round(Math.max(0, Math.min(canvasHeight - 1, y)))
+        y: Math.round(Math.max(0, Math.min(canvasHeight - 1, y))),
       });
     }
   };
 
-  addSamplePoints(rectX - sampleOffset, rectY - sampleOffset, rectX + rectWidth + sampleOffset, rectY - sampleOffset); // Top
-  addSamplePoints(rectX - sampleOffset, rectY + rectHeight + sampleOffset, rectX + rectWidth + sampleOffset, rectY + rectHeight + sampleOffset); // Bottom
-  addSamplePoints(rectX - sampleOffset, rectY - sampleOffset, rectX - sampleOffset, rectY + rectHeight + sampleOffset); // Left
-  addSamplePoints(rectX + rectWidth + sampleOffset, rectY - sampleOffset, rectX + rectWidth + sampleOffset, rectY + rectHeight + sampleOffset); // Right
+  addSamplePoints(
+    rectX - sampleOffset,
+    rectY - sampleOffset,
+    rectX + rectWidth + sampleOffset,
+    rectY - sampleOffset,
+  ); // Top
+  addSamplePoints(
+    rectX - sampleOffset,
+    rectY + rectHeight + sampleOffset,
+    rectX + rectWidth + sampleOffset,
+    rectY + rectHeight + sampleOffset,
+  ); // Bottom
+  addSamplePoints(
+    rectX - sampleOffset,
+    rectY - sampleOffset,
+    rectX - sampleOffset,
+    rectY + rectHeight + sampleOffset,
+  ); // Left
+  addSamplePoints(
+    rectX + rectWidth + sampleOffset,
+    rectY - sampleOffset,
+    rectX + rectWidth + sampleOffset,
+    rectY + rectHeight + sampleOffset,
+  ); // Right
 
-  if (samplePoints.length === 0) return '#1E293B';
+  if (samplePoints.length === 0) return "#1E293B";
 
-  let r = 0, g = 0, b = 0, count = 0;
+  let r = 0,
+    g = 0,
+    b = 0,
+    count = 0;
 
   for (const point of samplePoints) {
     try {
@@ -74,41 +109,102 @@ const getAverageColorForBox = (
         b += pixel[2];
         count++;
       }
-    } catch (e) { /* Ignore */ }
+    } catch (e) {
+      /* Ignore */
+    }
   }
 
-  if (count === 0) return '#1E293B';
+  if (count === 0) return "#1E293B";
 
   return `rgb(${Math.floor(r / count)}, ${Math.floor(g / count)}, ${Math.floor(b / count)})`;
 };
-
 
 export const ResultDisplay: React.FC<{
   originalImageUrl: string;
   initialTranslations: TranslationBlock[];
   defaultFilename: string;
   isGeneratingFilename: boolean;
-}> = ({ originalImageUrl, initialTranslations, defaultFilename, isGeneratingFilename }) => {
+}> = ({
+  originalImageUrl,
+  initialTranslations,
+  defaultFilename,
+  isGeneratingFilename,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const [translations, setTranslations] = useState(initialTranslations);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [interaction, setInteraction] = useState<InteractionState>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-  const [originalImageSize, setOriginalImageSize] = useState({ width: 0, height: 0 });
+  const [originalImageSize, setOriginalImageSize] = useState({
+    width: 0,
+    height: 0,
+  });
   const [exportSettings, setExportSettings] = useState<ExportSettingsType>({
     filename: defaultFilename,
     width: 0,
     height: 0,
-    dpi: 150
+    dpi: 150,
   });
-  const [cursorStyle, setCursorStyle] = useState('move');
+  const [cursorStyle, setCursorStyle] = useState("move");
   const [showUnitConverter, setShowUnitConverter] = useState(false);
   const [hasConvertibleUnits, setHasConvertibleUnits] = useState(false);
 
+  // Undo/Redo 履歴管理
+  const [history, setHistory] = useState<TranslationBlock[][]>([
+    initialTranslations,
+  ]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+
+  const pushHistory = useCallback(
+    (newTranslations: TranslationBlock[]) => {
+      setHistory((prev) => {
+        const trimmed = prev.slice(0, historyIndex + 1);
+        return [...trimmed, newTranslations];
+      });
+      setHistoryIndex((prev) => prev + 1);
+    },
+    [historyIndex],
+  );
+
+  const undo = useCallback(() => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setTranslations(history[newIndex]);
+    }
+  }, [historyIndex, history]);
+
+  const redo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setTranslations(history[newIndex]);
+    }
+  }, [historyIndex, history]);
+
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
+
+  // Ctrl+Z / Ctrl+Shift+Z キーボードショートカット
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [undo, redo]);
+
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
+    const ctx = canvas?.getContext("2d");
     const img = imageRef.current;
     if (!ctx || !canvas || !img) return;
 
@@ -122,14 +218,22 @@ export const ResultDisplay: React.FC<{
       const rectWidth = box.width * canvas.width;
       const rectHeight = box.height * canvas.height;
 
-      const backgroundColor = getAverageColorForBox(ctx, box, canvas.width, canvas.height);
+      const backgroundColor = getAverageColorForBox(
+        ctx,
+        box,
+        canvas.width,
+        canvas.height,
+      );
       ctx.fillStyle = backgroundColor;
       ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
 
       const rgbMatch = backgroundColor.match(/\d+/g);
       let textColor = "white";
       if (rgbMatch) {
-        const luma = 0.299 * parseInt(rgbMatch[0]) + 0.587 * parseInt(rgbMatch[1]) + 0.114 * parseInt(rgbMatch[2]);
+        const luma =
+          0.299 * parseInt(rgbMatch[0]) +
+          0.587 * parseInt(rgbMatch[1]) +
+          0.114 * parseInt(rgbMatch[2]);
         textColor = luma > 128 ? "black" : "white";
       }
 
@@ -142,29 +246,41 @@ export const ResultDisplay: React.FC<{
       const calculateFont = (size: number) => `bold ${size}px ${fontFamily}`;
       ctx.font = calculateFont(fontSize);
 
-      while (ctx.measureText(t.englishText).width > rectWidth * 0.9 && fontSize > 8) {
+      while (
+        ctx.measureText(t.englishText).width > rectWidth * 0.9 &&
+        fontSize > 8
+      ) {
         fontSize -= 1;
         ctx.font = calculateFont(fontSize);
       }
-      ctx.fillText(t.englishText, rectX + rectWidth / 2, rectY + rectHeight / 2);
+      ctx.fillText(
+        t.englishText,
+        rectX + rectWidth / 2,
+        rectY + rectHeight / 2,
+      );
 
       if (index === selectedIndex) {
         ctx.save();
-        ctx.shadowColor = 'rgba(99, 102, 241, 0.6)';
+        ctx.shadowColor = "rgba(99, 102, 241, 0.6)";
         ctx.shadowBlur = 12;
-        ctx.strokeStyle = '#818CF8'; // Indigo-400
+        ctx.strokeStyle = "#818CF8"; // Indigo-400
         ctx.lineWidth = 3;
         ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
         ctx.restore();
 
-        HANDLES.forEach(handle => {
-          const [x, y] = getHandleCoords(box, handle, canvas.width, canvas.height);
+        HANDLES.forEach((handle) => {
+          const [x, y] = getHandleCoords(
+            box,
+            handle,
+            canvas.width,
+            canvas.height,
+          );
           ctx.beginPath();
           ctx.arc(x, y, HANDLE_SIZE / 1.5, 0, 2 * Math.PI);
-          ctx.fillStyle = '#ffffff';
+          ctx.fillStyle = "#ffffff";
           ctx.fill();
           ctx.lineWidth = 2.5;
-          ctx.strokeStyle = '#818CF8';
+          ctx.strokeStyle = "#818CF8";
           ctx.stroke();
         });
       }
@@ -177,7 +293,10 @@ export const ResultDisplay: React.FC<{
     img.src = originalImageUrl;
     img.onload = () => {
       imageRef.current = img;
-      setOriginalImageSize({ width: img.naturalWidth, height: img.naturalHeight });
+      setOriginalImageSize({
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      });
       const canvas = canvasRef.current;
       if (canvas) {
         const aspectRatio = img.naturalWidth / img.naturalHeight;
@@ -190,13 +309,13 @@ export const ResultDisplay: React.FC<{
   }, [originalImageUrl]);
 
   useEffect(() => {
-    setExportSettings(prev => ({ ...prev, filename: defaultFilename }));
+    setExportSettings((prev) => ({ ...prev, filename: defaultFilename }));
   }, [defaultFilename]);
 
   // 変換可能な単位があるかチェック
   useEffect(() => {
-    const hasUnits = translations.some(t =>
-      getAvailableConversions(t.englishText).length > 0
+    const hasUnits = translations.some(
+      (t) => getAvailableConversions(t.englishText).length > 0,
     );
     setHasConvertibleUnits(hasUnits);
   }, [translations]);
@@ -210,55 +329,83 @@ export const ResultDisplay: React.FC<{
     }
   }, [canvasSize, draw]);
 
-  const getHandleUnderCursor = (x: number, y: number, box: BoundingBox): HandleType | null => {
+  const getHandleUnderCursor = (
+    x: number,
+    y: number,
+    box: BoundingBox,
+  ): HandleType | null => {
     for (const handle of HANDLES) {
-      const [hx, hy] = getHandleCoords(box, handle, canvasSize.width, canvasSize.height);
-      if (x >= hx - HANDLE_SIZE && x <= hx + HANDLE_SIZE && y >= hy - HANDLE_SIZE && y <= hy + HANDLE_SIZE) {
+      const [hx, hy] = getHandleCoords(
+        box,
+        handle,
+        canvasSize.width,
+        canvasSize.height,
+      );
+      if (
+        x >= hx - HANDLE_SIZE &&
+        x <= hx + HANDLE_SIZE &&
+        y >= hy - HANDLE_SIZE &&
+        y <= hy + HANDLE_SIZE
+      ) {
         return handle;
       }
     }
     return null;
-  }
+  };
 
-  const getHandleCoords = (box: BoundingBox, handle: HandleType, width: number, height: number): [number, number] => {
+  const getHandleCoords = (
+    box: BoundingBox,
+    handle: HandleType,
+    width: number,
+    height: number,
+  ): [number, number] => {
     const rectX = box.x * width;
     const rectY = box.y * height;
     const rectWidth = box.width * width;
     const rectHeight = box.height * height;
 
     switch (handle) {
-      case 'tl': return [rectX, rectY];
-      case 'tm': return [rectX + rectWidth / 2, rectY];
-      case 'tr': return [rectX + rectWidth, rectY];
-      case 'ml': return [rectX, rectY + rectHeight / 2];
-      case 'mr': return [rectX + rectWidth, rectY + rectHeight / 2];
-      case 'bl': return [rectX, rectY + rectHeight];
-      case 'bm': return [rectX + rectWidth / 2, rectY + rectHeight];
-      case 'br': return [rectX + rectWidth, rectY + rectHeight];
-      default: return [0, 0];
+      case "tl":
+        return [rectX, rectY];
+      case "tm":
+        return [rectX + rectWidth / 2, rectY];
+      case "tr":
+        return [rectX + rectWidth, rectY];
+      case "ml":
+        return [rectX, rectY + rectHeight / 2];
+      case "mr":
+        return [rectX + rectWidth, rectY + rectHeight / 2];
+      case "bl":
+        return [rectX, rectY + rectHeight];
+      case "bm":
+        return [rectX + rectWidth / 2, rectY + rectHeight];
+      case "br":
+        return [rectX + rectWidth, rectY + rectHeight];
+      default:
+        return [0, 0];
     }
   };
 
   const getCursorForHandle = (handle: HandleType): string => {
     switch (handle) {
-      case 'tl': // 左上
-        return 'nw-resize';
-      case 'tr': // 右上
-        return 'ne-resize';
-      case 'bl': // 左下
-        return 'sw-resize';
-      case 'br': // 右下
-        return 'se-resize';
-      case 'tm': // 上
-        return 'n-resize';
-      case 'bm': // 下
-        return 's-resize';
-      case 'ml': // 左
-        return 'w-resize';
-      case 'mr': // 右
-        return 'e-resize';
+      case "tl": // 左上
+        return "nw-resize";
+      case "tr": // 右上
+        return "ne-resize";
+      case "bl": // 左下
+        return "sw-resize";
+      case "br": // 右下
+        return "se-resize";
+      case "tm": // 上
+        return "n-resize";
+      case "bm": // 下
+        return "s-resize";
+      case "ml": // 左
+        return "w-resize";
+      case "mr": // 右
+        return "e-resize";
       default:
-        return 'move';
+        return "move";
     }
   };
 
@@ -275,12 +422,12 @@ export const ResultDisplay: React.FC<{
       const handle = getHandleUnderCursor(mouseX, mouseY, selectedBox);
       if (handle) {
         setInteraction({
-          type: 'resize',
+          type: "resize",
           handle,
           startIndex: selectedIndex,
           startX: mouseX,
           startY: mouseY,
-          startBox: selectedBox
+          startBox: selectedBox,
         });
         return;
       }
@@ -292,7 +439,12 @@ export const ResultDisplay: React.FC<{
       const rectY = box.y * canvasSize.height;
       const rectWidth = box.width * canvasSize.width;
       const rectHeight = box.height * canvasSize.height;
-      if (mouseX >= rectX && mouseX <= rectX + rectWidth && mouseY >= rectY && mouseY <= rectY + rectHeight) {
+      if (
+        mouseX >= rectX &&
+        mouseX <= rectX + rectWidth &&
+        mouseY >= rectY &&
+        mouseY <= rectY + rectHeight
+      ) {
         newSelectedIndex = i;
         break;
       }
@@ -300,7 +452,14 @@ export const ResultDisplay: React.FC<{
 
     setSelectedIndex(newSelectedIndex);
     if (newSelectedIndex !== null) {
-      setInteraction({ type: 'move', handle: 'body', startIndex: newSelectedIndex, startX: mouseX, startY: mouseY, startBox: translations[newSelectedIndex].boundingBox });
+      setInteraction({
+        type: "move",
+        handle: "body",
+        startIndex: newSelectedIndex,
+        startX: mouseX,
+        startY: mouseY,
+        startBox: translations[newSelectedIndex].boundingBox,
+      });
     } else {
       setInteraction(null);
     }
@@ -314,7 +473,7 @@ export const ResultDisplay: React.FC<{
 
     // Update cursor style based on mouse position
     if (!interaction) {
-      let newCursorStyle = 'move';
+      let newCursorStyle = "move";
 
       if (selectedIndex !== null) {
         const selectedBox = translations[selectedIndex].boundingBox;
@@ -330,12 +489,17 @@ export const ResultDisplay: React.FC<{
             const rectY = box.y * canvasSize.height;
             const rectWidth = box.width * canvasSize.width;
             const rectHeight = box.height * canvasSize.height;
-            if (mouseX >= rectX && mouseX <= rectX + rectWidth && mouseY >= rectY && mouseY <= rectY + rectHeight) {
+            if (
+              mouseX >= rectX &&
+              mouseX <= rectX + rectWidth &&
+              mouseY >= rectY &&
+              mouseY <= rectY + rectHeight
+            ) {
               isOverTextBox = true;
               break;
             }
           }
-          newCursorStyle = isOverTextBox ? 'move' : 'default';
+          newCursorStyle = isOverTextBox ? "move" : "default";
         }
       } else {
         // Check if mouse is over any text box when none is selected
@@ -346,12 +510,17 @@ export const ResultDisplay: React.FC<{
           const rectY = box.y * canvasSize.height;
           const rectWidth = box.width * canvasSize.width;
           const rectHeight = box.height * canvasSize.height;
-          if (mouseX >= rectX && mouseX <= rectX + rectWidth && mouseY >= rectY && mouseY <= rectY + rectHeight) {
+          if (
+            mouseX >= rectX &&
+            mouseX <= rectX + rectWidth &&
+            mouseY >= rectY &&
+            mouseY <= rectY + rectHeight
+          ) {
             isOverTextBox = true;
             break;
           }
         }
-        newCursorStyle = isOverTextBox ? 'pointer' : 'default';
+        newCursorStyle = isOverTextBox ? "pointer" : "default";
       }
 
       setCursorStyle(newCursorStyle);
@@ -366,40 +535,67 @@ export const ResultDisplay: React.FC<{
     const newTranslations = [...translations];
     let newBox = { ...interaction.startBox };
 
-    if (interaction.type === 'move') {
+    if (interaction.type === "move") {
       newBox.x += dx;
       newBox.y += dy;
-    } else if (interaction.type === 'resize') {
+    } else if (interaction.type === "resize") {
       const handle = interaction.handle;
-      if (handle.includes('l')) { newBox.x += dx; newBox.width -= dx; }
-      if (handle.includes('r')) { newBox.width += dx; }
-      if (handle.includes('t')) { newBox.y += dy; newBox.height -= dy; }
-      if (handle.includes('b')) { newBox.height += dy; }
+      if (handle.includes("l")) {
+        newBox.x += dx;
+        newBox.width -= dx;
+      }
+      if (handle.includes("r")) {
+        newBox.width += dx;
+      }
+      if (handle.includes("t")) {
+        newBox.y += dy;
+        newBox.height -= dy;
+      }
+      if (handle.includes("b")) {
+        newBox.height += dy;
+      }
 
-      if (newBox.width < 0) { newBox.width = 0; }
-      if (newBox.height < 0) { newBox.height = 0; }
+      if (newBox.width < 0) {
+        newBox.width = 0;
+      }
+      if (newBox.height < 0) {
+        newBox.height = 0;
+      }
     }
 
-    newTranslations[interaction.startIndex] = { ...newTranslations[interaction.startIndex], boundingBox: newBox };
+    newTranslations[interaction.startIndex] = {
+      ...newTranslations[interaction.startIndex],
+      boundingBox: newBox,
+    };
     setTranslations(newTranslations);
   };
 
   const handleMouseUp = () => {
+    if (interaction) {
+      // 移動/リサイズ操作が完了したら履歴に保存
+      pushHistory(translations);
+    }
     setInteraction(null);
   };
 
   const handleUnitConversion = () => {
-    const convertedTranslations = translations.map(translation => {
-      const availableConversions = getAvailableConversions(translation.englishText);
+    const convertedTranslations = translations.map((translation) => {
+      const availableConversions = getAvailableConversions(
+        translation.englishText,
+      );
       if (availableConversions.length > 0) {
         return {
           ...translation,
-          englishText: convertUnits(translation.englishText, availableConversions)
+          englishText: convertUnits(
+            translation.englishText,
+            availableConversions,
+          ),
         };
       }
       return translation;
     });
     setTranslations(convertedTranslations);
+    pushHistory(convertedTranslations);
     setShowUnitConverter(false);
   };
 
@@ -414,8 +610,8 @@ export const ResultDisplay: React.FC<{
 
     requestAnimationFrame(() => {
       // Create a new canvas for export with the desired size
-      const exportCanvas = document.createElement('canvas');
-      const exportCtx = exportCanvas.getContext('2d');
+      const exportCanvas = document.createElement("canvas");
+      const exportCtx = exportCanvas.getContext("2d");
       if (!exportCtx) return;
 
       // Determine export dimensions
@@ -445,12 +641,17 @@ export const ResultDisplay: React.FC<{
         const rectWidth = box.width * exportWidth;
         const rectHeight = box.height * exportHeight;
 
-        const backgroundColor = getAverageColorForBox(exportCtx, {
-          x: box.x,
-          y: box.y,
-          width: box.width,
-          height: box.height
-        }, exportWidth, exportHeight);
+        const backgroundColor = getAverageColorForBox(
+          exportCtx,
+          {
+            x: box.x,
+            y: box.y,
+            width: box.width,
+            height: box.height,
+          },
+          exportWidth,
+          exportHeight,
+        );
 
         exportCtx.fillStyle = backgroundColor;
         exportCtx.fillRect(rectX, rectY, rectWidth, rectHeight);
@@ -458,7 +659,10 @@ export const ResultDisplay: React.FC<{
         const rgbMatch = backgroundColor.match(/\d+/g);
         let textColor = "white";
         if (rgbMatch) {
-          const luma = 0.299 * parseInt(rgbMatch[0]) + 0.587 * parseInt(rgbMatch[1]) + 0.114 * parseInt(rgbMatch[2]);
+          const luma =
+            0.299 * parseInt(rgbMatch[0]) +
+            0.587 * parseInt(rgbMatch[1]) +
+            0.114 * parseInt(rgbMatch[2]);
           textColor = luma > 128 ? "black" : "white";
         }
 
@@ -471,16 +675,23 @@ export const ResultDisplay: React.FC<{
         const calculateFont = (size: number) => `bold ${size}px ${fontFamily}`;
         exportCtx.font = calculateFont(fontSize);
 
-        while (exportCtx.measureText(t.englishText).width > rectWidth * 0.9 && fontSize > 8) {
+        while (
+          exportCtx.measureText(t.englishText).width > rectWidth * 0.9 &&
+          fontSize > 8
+        ) {
           fontSize -= 1;
           exportCtx.font = calculateFont(fontSize);
         }
-        exportCtx.fillText(t.englishText, rectX + rectWidth / 2, rectY + rectHeight / 2);
+        exportCtx.fillText(
+          t.englishText,
+          rectX + rectWidth / 2,
+          rectY + rectHeight / 2,
+        );
       });
 
       // Export with DPI setting (PNG doesn't support DPI in canvas, but we keep the setting for future use)
-      const dataUrl = exportCanvas.toDataURL('image/png', 1.0);
-      const a = document.createElement('a');
+      const dataUrl = exportCanvas.toDataURL("image/png", 1.0);
+      const a = document.createElement("a");
       a.href = dataUrl;
       a.download = `${exportSettings.filename}.png`;
       document.body.appendChild(a);
@@ -490,22 +701,80 @@ export const ResultDisplay: React.FC<{
       // Restore selection
       setSelectedIndex(currentSelection);
     });
-  }
+  };
 
   return (
     <div>
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-3">
-          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-sm font-bold border border-emerald-200 dark:border-emerald-800">3</span>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">調整とエクスポート</h2>
+          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-sm font-bold border border-emerald-200 dark:border-emerald-800">
+            3
+          </span>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+            調整とエクスポート
+          </h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={undo}
+            disabled={!canUndo}
+            aria-label="元に戻す (Ctrl+Z)"
+            title="元に戻す (Ctrl+Z)"
+            className="p-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4"
+              />
+            </svg>
+          </button>
+          <button
+            onClick={redo}
+            disabled={!canRedo}
+            aria-label="やり直す (Ctrl+Shift+Z)"
+            title="やり直す (Ctrl+Shift+Z)"
+            className="p-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 10H11a5 5 0 00-5 5v2M21 10l-4-4M21 10l-4 4"
+              />
+            </svg>
+          </button>
         </div>
         {hasConvertibleUnits && (
           <button
             onClick={() => setShowUnitConverter(!showUnitConverter)}
             className="px-5 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-border-light dark:border-border-dark text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            <svg
+              className="w-4 h-4 text-primary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+              />
             </svg>
             単位変換ツール
           </button>
@@ -519,8 +788,18 @@ export const ResultDisplay: React.FC<{
       {showUnitConverter && (
         <div className="mb-8 p-6 bg-primary/5 border border-primary/20 rounded-2xl shadow-inner backdrop-blur-sm animate-fade-in-up md:ml-11">
           <h3 className="text-lg font-bold text-primary dark:text-primary mb-2 flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
             スマート単位変換
           </h3>
@@ -528,14 +807,38 @@ export const ResultDisplay: React.FC<{
             画像内に検出された以下の単位を、ワンクリックで変換します。
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm text-slate-700 dark:text-slate-200 mb-6 bg-white/50 dark:bg-slate-900/30 p-4 rounded-xl border border-border-light dark:border-slate-700/50">
-            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span>cm → inch</div>
-            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span>mm → inch</div>
-            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span>m → ft</div>
-            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span>km → mile</div>
-            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span>g → oz</div>
-            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span>kg → lb</div>
-            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span>°C → °F</div>
-            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span>ml → fl oz</div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>cm →
+              inch
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>mm →
+              inch
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>m →
+              ft
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>km →
+              mile
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>g →
+              oz
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>kg →
+              lb
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>°C →
+              °F
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>ml →
+              fl oz
+            </div>
           </div>
           <div className="flex gap-4">
             <button
@@ -557,7 +860,14 @@ export const ResultDisplay: React.FC<{
       <div className="flex flex-col lg:flex-row gap-8 pl-0 lg:pl-11">
         {/* Canvas area */}
         <div className="flex-grow bg-slate-100 dark:bg-slate-900 rounded-xl p-4 md:p-8 flex items-center justify-center min-h-[500px] border border-border-light dark:border-border-dark shadow-inner relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10 dark:opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--color-primary) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+          <div
+            className="absolute inset-0 opacity-10 dark:opacity-5 pointer-events-none"
+            style={{
+              backgroundImage:
+                "radial-gradient(var(--color-primary) 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+            }}
+          ></div>
 
           <div
             className="relative shadow-2xl rounded-sm overflow-hidden group max-w-full"
@@ -570,15 +880,25 @@ export const ResultDisplay: React.FC<{
               onMouseMove={handleMouseMove}
               className="w-full h-auto"
               style={{ cursor: cursorStyle }}
+              role="img"
+              aria-label="翻訳結果のプレビュー。テキストブロックをクリックして選択、ドラッグで移動、ハンドルでリサイズできます"
             />
           </div>
 
           <div className="absolute bottom-4 right-4 flex gap-2">
-            <button className="p-2 bg-white dark:bg-slate-800 rounded shadow text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+            <button
+              aria-label="縮小"
+              className="p-2 bg-white dark:bg-slate-800 rounded shadow text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
               <span className="material-icons-outlined text-sm">remove</span>
             </button>
-            <span className="px-3 py-2 bg-white dark:bg-slate-800 rounded shadow text-xs font-mono flex items-center text-slate-600 dark:text-slate-300">100%</span>
-            <button className="p-2 bg-white dark:bg-slate-800 rounded shadow text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+            <span className="px-3 py-2 bg-white dark:bg-slate-800 rounded shadow text-xs font-mono flex items-center text-slate-600 dark:text-slate-300">
+              100%
+            </span>
+            <button
+              aria-label="拡大"
+              className="p-2 bg-white dark:bg-slate-800 rounded shadow text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
               <span className="material-icons-outlined text-sm">add</span>
             </button>
           </div>

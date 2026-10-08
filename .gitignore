@@ -33,3 +33,5 @@ output
 .next
 images
 build_output.txt
+# private internal spec — not for OSS
+要件定義書.md
